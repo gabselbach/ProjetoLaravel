@@ -5,9 +5,9 @@
     <div class="row justify-content-center">
         <div class="col">
             <div class="meio">
-                          @if (session('status'))
+                     @if (session('successMsg'))
                         <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
+                            {{ session('successMsg') }}
                         </div>
                     @endif
 

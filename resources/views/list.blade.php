@@ -5,6 +5,11 @@
     <div class="row justify-content-center">
         <div class="col">
             <div class="meio">
+            	@if (session('successMsg'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('successMsg') }}
+                        </div>
+                    @endif
 <h2>Usuarios</h2>
 
 	@if($usuarios->count())

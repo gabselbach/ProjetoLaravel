@@ -5,6 +5,11 @@
     <div class="row justify-content-center">
         <div class="col">
             <div class="meio">
+              @if (session('Error'))
+                        <div class="alert alert-danger" role="alert">
+                            {{ session('Error') }}
+                        </div>
+                    @endif
 	<h2 style="color: #9C27AE;">Cadastro</h2>
 <form method="POST" action="{{route('user.store')}}" enctype="multipart/form-data">
 	 {{csrf_field()}}

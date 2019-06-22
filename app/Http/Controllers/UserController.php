@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Storage;
 use App\User;
+use App\Imagens;
+use DB;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
+
 class UserController extends Controller
 {
     /**
@@ -15,6 +20,7 @@ class UserController extends Controller
     public function index()
     {
         $usuarios = User::all();
+       
          return view('list',compact('usuarios'));
     }
 
@@ -39,15 +45,21 @@ class UserController extends Controller
         $usuario = new User;
         $usuario->nome = $request->nome;
         $usuario->email = $request->email;
-        $usuario->descricao = $request->descricao;
-        $extension = $request->imagem->extension();
-        $nome = uniqid(date('hisYmd'));
-        $nomearquivo = "{$nome} .{$extension}";
-        $upload = $request->imagem->storeAs('users',$nomearquivo);
-        $usuario->imagem = $upload;
-        $usuario->password =0;
-        $usuario->save();
-        return view('home');
+        $temEmail = DB::table('users')->where('users.email', '=', "$usuario->email")->count();
+        if($temEmail){
+            return redirect()->route('user.create')->with('Error','Email já cadastrado .');
+        }else{
+            $usuario->descricao = $request->descricao;
+            $extension = $request->imagem->extension();
+            $nome = uniqid(date('hisYmd'));
+            $nomearquivo = "{$nome} .{$extension}";
+            $upload = $request->imagem->storeAs('users',$nomearquivo);
+            $usuario->imagem = $upload;
+            $usuario->password =Hash::make(0);
+            $usuario->save();
+            return view('home');
+        }
+       
     }
 
     /**
@@ -59,7 +71,17 @@ class UserController extends Controller
     public function show($id)
     {
          $usuario = User::findOrFail($id);
-        return view('show',compact('usuario'));
+          $imagens = DB::table('users')
+            ->join('imagens', 'users.id', '=', 'imagens.user_id')
+            ->select('imagens.imagem')
+            ->where('users.id', '=', $id)
+            ->get();
+            $img = [];
+             foreach ($imagens as $i){
+               
+                $img[] = $i->imagem;
+             }
+        return view('show',compact('usuario','img'));
     }
 
     /**
@@ -74,7 +96,7 @@ class UserController extends Controller
         return view('edit',compact('usuario'));
 
     }
-
+    
     /**
      * Update the specified resource in storage.
      *
@@ -88,7 +110,7 @@ class UserController extends Controller
         $usuario->nome = $request->nome;
         $usuario->email = $request->email;
         $usuario->descricao = $request->descricao;
-        $usuario->password =0;
+        $usuario->password = $usuario->password ;
         if($request->hasFile('imagem')){
             Storage::delete($usuario->imagem);
             $nome = uniqid(date('hisYmd'));
@@ -100,10 +122,26 @@ class UserController extends Controller
         $usuario->update();
         return view('home');
     }
-    public function editPassword(Request $request, $id){
-        DB::table('users')
-            ->where('id', $id)
-            ->update(['password' => $request->password]);
+    public function editPassword(Request $request){
+        $id = $request->id;
+        $email = $request->email;
+        $resp =  DB::table('users')->where([
+                ['id', '=', $id],
+                ['email', '=', "$email"],
+            ])->count();
+        if($resp){
+             DB::table('users')
+            ->where([
+                ['id', '=', $id],
+                ['email', '=', "$email"],
+            ])
+            ->update(['password' => Hash::make($request->password)]);
+             return redirect('home')->with('successMsg','Senha Alterada .');  
+            
+        }else{
+
+        }
+       
     }
 
     /**
@@ -117,7 +155,16 @@ class UserController extends Controller
         echo "ola";
         $usuario = User::findOrFail($id);
         Storage::delete($usuario->imagem);
+         $imagens = DB::table('users')
+            ->join('imagens', 'users.id', '=', 'imagens.user_id')
+            ->select('imagens.imagem')
+            ->where('users.id', '=', $id)
+            ->get();
+             foreach ($imagens as $i){
+               Storage::delete($i->imagem);
+             }
         $usuario->delete();
-        return redirect()->route('user.index');  
+        return redirect()->route('user.index')->with('successMsg','Usuário removido .');  
+
     }
 }

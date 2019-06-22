@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col">
             <div class="meio">
-	<h1>Cadastro</h1>
+	<h1>Edição de informações:</h1>
 <form method="POST" action="{{route('user.update',$usuario->id)}}" enctype="multipart/form-data">
 	 {{csrf_field()}}
       {!! method_field('put') !!}

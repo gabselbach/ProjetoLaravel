@@ -13,13 +13,17 @@
 
 Route::get('/', function () {
     return view('home');
-});
-//Route::get('/create','UserController@create');
+})->name('home');
+
 Route::resource('user','UserController');
-Route::resource('/editPassword','UserController@editPassword');
-//Route::get('/n/','UserController@destroy');
-//Route::post('user/store','UserController@store');
-//{{route('user.destroy', $usuario->id)}}
+Route::resource('imagem','ImagemController');
+Route::post('imagemPerfil','UserController@imagemPerfil')->name('imagemPerfil');
+//Route::post('addImagem','UserController@adicionaImagem')->name('addImagem');
+Route::get('trocarSenha', function () {
+    return view('auth/passwords/reset');
+})->name('trocarSenha');
+Route::post('editPassword','UserController@editPassword')->name('editPassword');
+
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
