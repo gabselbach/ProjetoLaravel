@@ -37,12 +37,18 @@ Para rodar o projeto aconselho a utilizar o próprio serve do artisan, para isso
 
  é mostrado em que endereço ele foi startado, sera algo como: 127.0.0.1:8000
 
+
+### Observações
+- A senha de cada pessoa já vem configurada por default como 0, no "perfil" de cada usuário existe uma opção para trocar de senha.
+- Alguns links de jquery e css são online, desta maneira é recomendado que para executar o projeto você tenha internet, pois caso contrário algumas coisas podem não funcionar como deveriam.
+
 #### Implementado:
  * Opções sobre usuários:
    - [x] Inserção de informações
    - [x] Exclusão
    - [x] Alteração
    - [x] Visualização
-   - [ ] Inserção de múltiplas fotos
-   - [ ] Login
+   - [x] Inserção de múltiplas fotos
+   - [x] Login
  
+

@@ -50,11 +50,15 @@ class UserController extends Controller
             return redirect()->route('user.create')->with('Error','Email já cadastrado .');
         }else{
             $usuario->descricao = $request->descricao;
-            $extension = $request->imagem->extension();
-            $nome = uniqid(date('hisYmd'));
-            $nomearquivo = "{$nome} .{$extension}";
-            $upload = $request->imagem->storeAs('users',$nomearquivo);
-            $usuario->imagem = $upload;
+            if($request->hasFile('imagem')){
+                $extension = $request->imagem->extension();
+                $nome = uniqid(date('hisYmd'));
+                $nomearquivo = "{$nome} .{$extension}";
+                $upload = $request->imagem->storeAs('users',$nomearquivo);
+                $usuario->imagem = $upload;
+            }else{
+                $usuario->imagem ='0';
+            }
             $usuario->password =Hash::make(0);
             $usuario->save();
             return view('home');
@@ -120,7 +124,7 @@ class UserController extends Controller
             $usuario->imagem = $upload;
         }
         $usuario->update();
-        return view('home');
+        return redirect()->route('user.index')->with('successMsg','Usuário Alterado com sucesso .');  
     }
     public function editPassword(Request $request){
         $id = $request->id;
@@ -154,7 +158,9 @@ class UserController extends Controller
     {
         echo "ola";
         $usuario = User::findOrFail($id);
-        Storage::delete($usuario->imagem);
+         if($usuario->imagem!=null){
+            Storage::delete($usuario->imagem);
+        }
          $imagens = DB::table('users')
             ->join('imagens', 'users.id', '=', 'imagens.user_id')
             ->select('imagens.imagem')
@@ -166,5 +172,25 @@ class UserController extends Controller
         $usuario->delete();
         return redirect()->route('user.index')->with('successMsg','Usuário removido .');  
 
+    }
+    public function imagemPerfil(Request $request)
+    {
+        $id = $request->id;
+        $usuario = User::findOrFail($id);
+        if($usuario->imagem!='0'){
+            Storage::delete($usuario->imagem);
+        }
+        if($request->hasFile('imagem')){
+            $nome = uniqid(date('hisYmd'));
+            $extension = $request->imagem->extension();
+            $nomearquivo = "{$nome} .{$extension}";
+            $upload = $request->imagem->storeAs('users',$nomearquivo);
+            $usuario->imagem = $upload;
+            DB::table('users')
+                ->where('id', '=', $id)
+                ->update(['imagem' => $usuario->imagem]);
+
+        }
+        return redirect()->route('user.index')->with('successMsg','Foto Alterado com sucesso.');
     }
 }
